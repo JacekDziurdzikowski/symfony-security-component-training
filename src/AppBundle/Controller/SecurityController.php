@@ -10,8 +10,11 @@ namespace AppBundle\Controller;
 
 
 use AppBundle\Form\LoginForm;
+use Symfony\Bridge\Doctrine\Security\User\EntityUserProvider;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends Controller
 {
@@ -20,6 +23,9 @@ class SecurityController extends Controller
      */
     public function loginAction()
     {
+        /**
+         * @var AuthenticationUtils $authenticationUtils
+         */
         $authenticationUtils = $this->get('security.authentication_utils');
 
         // get the login error if there is one
@@ -40,5 +46,12 @@ class SecurityController extends Controller
                 'error'         => $error,
             )
         );
+    }
+
+    /**
+     * @Route("/logout", name="security_logout")
+     */
+    public function logoutAction(Request $request){
+        throw new \Exception('This should not be reached');
     }
 }
