@@ -52,6 +52,13 @@ class User implements UserInterface
         return $this->password;
     }
 
+
+    public function setPassword($password)
+    {
+        $this->password = $password;
+    }
+
+
     public function getSalt()
     {
     }
