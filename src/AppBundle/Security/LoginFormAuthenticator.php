@@ -8,8 +8,10 @@ use Doctrine\ORM\EntityManager;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Router;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoder;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
@@ -23,12 +25,17 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
     private $router;
     /** @var FormFactoryInterface */
     private $formFactory;
+    /**
+     * @var UserPasswordEncoder
+     */
+    private $passwordEncoder;
 
-    public function __construct(EntityManager $em, Router $router, FormFactoryInterface $formFactory)
+    public function __construct(EntityManager $em, Router $router, FormFactoryInterface $formFactory, UserPasswordEncoder $passwordEncoder)
     {
         $this->router = $router;
         $this->em = $em;
         $this->formFactory = $formFactory;
+        $this->passwordEncoder = $passwordEncoder;
     }
 
     public function getCredentials(Request $request)
@@ -55,17 +62,16 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         $username = $credentials['_username'];
 
         return  $this->em->getRepository(User::class)
-                ->findBy(['email' => $username]);
+                ->findOneBy(['email' => $username]);
     }
 
     public function checkCredentials($credentials, UserInterface $user)
     {
         $password = $credentials['_password'];
 
-        if($password === 'ThePassword'){
+        if($this->passwordEncoder->isPasswordValid($user, $password)){
             return true;
         }
-
         return false;
     }
 
@@ -85,6 +91,11 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator
         }
 
         return new RedirectResponse($targetPath);
+    }
+
+    private function getTargetPath(SessionInterface $session, $providerKey)
+    {
+        return $session->get('_security.'.$providerKey.'.target_path');
     }
 
 }

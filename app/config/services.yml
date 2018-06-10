@@ -17,7 +17,7 @@ services:
 
     app.security.login_form_authenticator:
         class: AppBundle\Security\LoginFormAuthenticator
-        arguments: ['@doctrine.orm.entity_manager', '@router', '@form.factory']
+        arguments: ['@doctrine.orm.entity_manager', '@router', '@form.factory', '@security.password_encoder']
 
     app.doctrine.hash_password_listener:
         class: AppBundle\Doctrine\HashPasswordListener
